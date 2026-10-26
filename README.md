@@ -21,22 +21,22 @@ Hopefully this will fit into a bigger picture in the future - specifically servi
 
 Install the package and development/test dependencies from the repository root:
 
-```powershell
-python -m pip install -e ".[dev]"
+```bash
+python3 -m pip install -e ".[dev]"
 ```
 
 ## Run the tests
 
-```powershell
-python -m pytest
+```bash
+python3 -m pytest
 ```
 
 ## Interactive demo
 
 Start the demo server from the repository root:
 
-```powershell
-python demo-server\demo_server.py
+```bash
+python3 demo-server/demo_server.py
 ```
 
 Open <http://127.0.0.1:8742> in a browser. The demo includes registration, authentication, crypto and authenticator-data tools, and a store inspector. The inspector lists credentials without private-key material by default. Select **Reveal secret key** on a credential to request and display its PEM private key; the separate secret endpoint is only called after that button is clicked. Select **Hide secret key** to remove the displayed value from the page.
@@ -45,8 +45,8 @@ The demo server is intended for local testing only. The inspector's secret-key e
 
 The server accepts `--port` and `--host` options. For example:
 
-```powershell
-python demo-server\demo_server.py --port 9000
+```bash
+python3 demo-server/demo_server.py --port 9000
 ```
 
 ## Firefox extension
