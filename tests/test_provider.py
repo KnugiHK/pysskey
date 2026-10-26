@@ -163,7 +163,7 @@ class TestCheckOrigin:
 
 
 # ===========================================================================
-# Task 5.4 – Comprehensive create() and get() tests
+# Comprehensive create() and get() tests
 # ===========================================================================
 
 import hashlib

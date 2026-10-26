@@ -2,6 +2,8 @@
 
 pysskey is a pure-Python WebAuthn Level 2/3 client-side authenticator library. It provides a `PasskeyProvider` that handles credential creation and authentication, with pluggable credential storage and cryptographic helpers.
 
+Hopefully this will fit into a bigger picture in the future - specifically serving as a foundation for  research.
+
 ## Features
 
 - WebAuthn credential creation and authentication through `PasskeyProvider`.

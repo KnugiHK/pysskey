@@ -1,4 +1,4 @@
-"""Unit tests for CredentialStore ABC and InMemoryStore (task 4.1)."""
+"""Unit tests for CredentialStore ABC and InMemoryStore."""
 
 from __future__ import annotations
 
