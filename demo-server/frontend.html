@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pysskey · Testing Front-end</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f1117;
+      --surface:  #1a1d27;
+      --surface2: #232638;
+      --border:   #2e3147;
+      --accent:   #6c8cf5;
+      --accent2:  #a78bfa;
+      --green:    #34d399;
+      --red:      #f87171;
+      --yellow:   #fbbf24;
+      --text:     #e2e4f0;
+      --muted:    #6b7280;
+      --radius:   10px;
+      --mono:     "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Layout ───────────────────────────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header .logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+    }
+    header .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    header .reset-btn {
+      margin-left: auto;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 5px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: border-color .15s, color .15s;
+    }
+    header .reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+    .app { display: flex; height: calc(100vh - 53px); overflow: hidden; }
+
+    /* ── Sidebar nav ──────────────────────────────────────────────────────── */
+    nav {
+      width: 220px;
+      min-width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 12px 0;
+    }
+    nav .nav-section {
+      padding: 6px 16px 4px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    nav button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      padding: 7px 16px 7px 20px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      border-left: 3px solid transparent;
+      transition: background .1s, border-color .1s, color .1s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    nav button:hover  { background: var(--surface2); }
+    nav button.active { border-left-color: var(--accent); color: var(--accent); background: var(--surface2); }
+
+    /* ── Main content ─────────────────────────────────────────────────────── */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .page { display: none; flex-direction: column; gap: 20px; }
+    .page.active { display: flex; }
+
+    /* ── Cards ────────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .card-header h2 { font-size: 14px; font-weight: 600; }
+    .card-header .tag {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .tag-crypto  { background: #1e3a5f; color: #60a5fa; }
+    .tag-auth    { background: #1e3a2a; color: #34d399; }
+    .tag-error   { background: #3a1e1e; color: #f87171; }
+    .tag-flow    { background: #3a2e1e; color: #fbbf24; }
+    .tag-store   { background: #2e1e3a; color: var(--accent2); }
+
+    .card-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+    /* ── Form controls ────────────────────────────────────────────────────── */
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
+    .field input, .field select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 6px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      min-width: 160px;
+      transition: border-color .15s;
+    }
+    .field input:focus, .field select:focus { border-color: var(--accent); }
+
+    .run-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 18px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: opacity .15s, transform .05s;
+      white-space: nowrap;
+      align-self: flex-end;
+    }
+    .run-btn:hover   { opacity: .88; }
+    .run-btn:active  { transform: scale(.97); }
+    .run-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* ── Result output ────────────────────────────────────────────────────── */
+    .result-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 420px;
+      overflow-y: auto;
+      display: none;
+    }
+    .result-box.visible { display: block; }
+    .result-box.ok   { border-color: var(--green); }
+    .result-box.fail { border-color: var(--red); }
+
+    /* ── Status badges ────────────────────────────────────────────────────── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-pass { background: #14342a; color: var(--green); }
+    .badge-fail { background: #3a1e1e; color: var(--red); }
+    .badge-info { background: #1e2a3a; color: var(--accent); }
+    .badge-warn { background: #3a2e1e; color: var(--yellow); }
+
+    /* ── Flag grid ────────────────────────────────────────────────────────── */
+    .flags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .flag {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--mono);
+    }
+    .flag-on  { background: #14342a; color: var(--green); }
+    .flag-off { background: var(--surface2); color: var(--muted); }
+
+    /* ── Key-value grid ───────────────────────────────────────────────────── */
+    .kv-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 4px 14px;
+      font-size: 12px;
+    }
+    .kv-key   { color: var(--muted); white-space: nowrap; }
+    .kv-val   { font-family: var(--mono); word-break: break-all; color: var(--text); }
+    .kv-pass  { color: var(--green); font-weight: 700; }
+    .kv-fail  { color: var(--red); font-weight: 700; }
+
+    /* ── Stats banner (dashboard) ─────────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .stat-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .stat-value { font-size: 26px; font-weight: 700; color: var(--accent); font-family: var(--mono); }
+
+    /* ── Origin table ─────────────────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th {
+      text-align: left;
+      padding: 6px 10px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface2); }
+
+    /* ── Section dividers ─────────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Loading spinner ──────────────────────────────────────────────────── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      display: none;
+    }
+    .spinner.visible { display: inline-block; }
+
+    /* ── Credential list ──────────────────────────────────────────────────── */
+    .cred-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .cred-id {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      word-break: break-all;
+    }
+
+    /* ── Error case grid ──────────────────────────────────────────────────── */
+    .error-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 10px;
+    }
+    .error-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      text-align: left;
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .error-btn:hover { border-color: var(--red); background: #1e1417; }
+    .error-btn .err-name { font-size: 12px; font-weight: 700; color: var(--red); font-family: var(--mono); }
+    .error-btn .err-desc { font-size: 11px; color: var(--muted); }
+
+    /* ── Scrollbar ────────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="logo">🔑 pysskey</span>
+  <span class="subtitle">Interactive Testing Front-end</span>
+  <button class="reset-btn" onclick="resetAll()">↺ Reset Store</button>
+</header>
+
+<div class="app">
+  <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+  <nav id="nav">
+    <div class="nav-section">Overview</div>
+    <button onclick="show('dashboard')" class="active" data-page="dashboard">📊 Dashboard</button>
+    <div class="nav-section">Crypto</div>
+    <button onclick="show('keypair')"   data-page="keypair">🔐 Key Generation</button>
+    <button onclick="show('signverify')" data-page="signverify">✍️ Sign &amp; Verify</button>
+    <div class="nav-section">Authenticator Data</div>
+    <button onclick="show('clientdata')"  data-page="clientdata">📄 clientDataJSON</button>
+    <button onclick="show('authdata')"    data-page="authdata">📦 authData</button>
+    <div class="nav-section">Origin</div>
+    <button onclick="show('origin')"      data-page="origin">🌐 Origin Validation</button>
+    <div class="nav-section">Provider</div>
+    <button onclick="show('register')"    data-page="register">📝 Registration</button>
+    <button onclick="show('authenticate')" data-page="authenticate">🔓 Authentication</button>
+    <button onclick="show('errors')"      data-page="errors">⚠️ Error Cases</button>
+    <button onclick="show('fullflow')"    data-page="fullflow">🔄 Full Flow</button>
+    <div class="nav-section">Store</div>
+    <button onclick="show('store')"       data-page="store">🗄️ Store Inspector</button>
+  </nav>
+
+  <!-- ── Main ───────────────────────────────────────────────────────────── -->
+  <main>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- DASHBOARD                                                          -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="card">
+        <div class="card-header">
+          <h2>Store Status</h2>
+          <span class="tag tag-store">live</span>
+        </div>
+        <div class="card-body">
+          <div id="dashboard-stats" class="stats-grid">
+            <div class="stat-card"><div class="stat-label">Credentials</div><div class="stat-value" id="stat-count">—</div></div>
+            <div class="stat-card"><div class="stat-label">RP ID</div><div class="stat-value" style="font-size:16px;word-break:break-all" id="stat-rp">—</div></div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>RP ID to inspect</label>
+              <input id="dash-rp" value="example.com" />
+            </div>
+            <button class="run-btn" onclick="loadDashboard()">Refresh</button>
+          </div>
+          <div id="dash-creds"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>Quick Start</h2></div>
+        <div class="card-body">
+          <p style="color:var(--muted);font-size:13px;line-height:1.7">
+            Use the left sidebar to navigate to each test section.<br>
+            Start with <strong style="color:var(--text)">Registration</strong>, then <strong style="color:var(--text)">Authentication</strong> — or use
+            <strong style="color:var(--text)">Full Flow</strong> for a one-click end-to-end run.<br>
+            <strong style="color:var(--text)">Reset Store</strong> in the header wipes all in-memory credentials.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- KEY GENERATION                                                     -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-keypair">
+      <div class="card">
+        <div class="card-header">
+          <h2>Key Generation &amp; COSE Encoding</h2>
+          <span class="tag tag-crypto">crypto</span>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="field">
+              <label>Algorithm</label>
+              <select id="kp-alg">
+                <option value="-7">-7 · ES256 (ECDSA P-256)</option>
+                <option value="-8">-8 · EdDSA (Ed25519)</option>
+              </select>
+            </div>
+            <button class="run-btn" id="kp-btn" onclick="runGenerateKeypair()">Generate Keypair</button>
+            <div class="spinner" id="kp-spin"></div>
+          </div>
+          <div id="kp-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SIGN & VERIFY                                                      -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-signverify">
+      <div class="card">
+        <div class="card-header">
+          <h2>Sign &amp; Verify Signature</h2>
+          <span class="tag tag-crypto">crypto</span>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="field">
+              <label>Algorithm</label>
+              <select id="sv-alg">
+                <option value="-7">-7 · ES256 (ECDSA P-256)</option>
+                <option value="-8">-8 · EdDSA (Ed25519)</option>
+              </select>
+            </div>
+            <div class="field" style="flex:1;min-width:220px">
+              <label>Message</label>
+              <input id="sv-msg" value="Hello, pysskey!" />
+            </div>
+            <button class="run-btn" id="sv-btn" onclick="runSignVerify()">Sign &amp; Verify</button>
+            <div class="spinner" id="sv-spin"></div>
+          </div>
+          <div id="sv-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- CLIENT DATA JSON                                                   -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-clientdata">
+      <div class="card">
+        <div class="card-header">
+          <h2>clientDataJSON Builder</h2>
+          <span class="tag tag-auth">webauthn</span>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="field">
+              <label>Type</label>
+              <select id="cd-type">
+                <option value="webauthn.create">webauthn.create</option>
+                <option value="webauthn.get">webauthn.get</option>
+              </select>
+            </div>
+            <div class="field" style="flex:1;min-width:200px">
+              <label>Origin</label>
+              <input id="cd-origin" value="https://example.com" />
+            </div>
+            <button class="run-btn" id="cd-btn" onclick="runBuildClientData()">Build</button>
+            <div class="spinner" id="cd-spin"></div>
+          </div>
+          <div id="cd-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- AUTH DATA                                                          -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-authdata">
+      <div class="card">
+        <div class="card-header">
+          <h2>authenticatorData Pack &amp; Parse</h2>
+          <span class="tag tag-auth">webauthn</span>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="field">
+              <label>Algorithm</label>
+              <select id="ad-alg">
+                <option value="-7">-7 · ES256</option>
+                <option value="-8">-8 · EdDSA</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>RP ID</label>
+              <input id="ad-rp" value="example.com" />
+            </div>
+            <div class="field">
+              <label>Sign Count</label>
+              <input id="ad-sc" type="number" value="42" style="min-width:90px" />
+            </div>
+            <div class="field">
+              <label>AAGUID (hex, 32 chars)</label>
+              <input id="ad-aaguid" value="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" style="min-width:200px;font-family:var(--mono);font-size:12px" />
+            </div>
+            <button class="run-btn" id="ad-btn" onclick="runPackAuthData()">Pack &amp; Parse</button>
+            <div class="spinner" id="ad-spin"></div>
+          </div>
+          <div id="ad-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- ORIGIN VALIDATION                                                  -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-origin">
+      <div class="card">
+        <div class="card-header">
+          <h2>Origin Validation</h2>
+          <span class="tag tag-auth">security</span>
+        </div>
+        <div class="card-body">
+          <p style="color:var(--muted);font-size:12px">
+            Runs the built-in test-case suite for <code style="color:var(--accent)">validate_origin()</code>.
+            Add custom rows below.
+          </p>
+          <div id="origin-custom-rows" style="display:flex;flex-direction:column;gap:8px"></div>
+          <div class="form-row">
+            <button class="run-btn" onclick="addOriginRow()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)">+ Add Row</button>
+            <button class="run-btn" id="origin-btn" onclick="runValidateOrigin()">Run All Cases</button>
+            <div class="spinner" id="origin-spin"></div>
+          </div>
+          <div id="origin-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- REGISTRATION                                                       -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-register">
+      <div class="card">
+        <div class="card-header">
+          <h2>PasskeyProvider.create()</h2>
+          <span class="tag tag-auth">registration</span>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="field">
+              <label>RP ID</label>
+              <input id="reg-rp" value="example.com" />
+            </div>
+            <div class="field">
+              <label>Origin</label>
+              <input id="reg-origin" value="https://example.com" />
+            </div>
+            <div class="field">
+              <label>User Name</label>
+              <input id="reg-user" value="alice@example.com" />
+            </div>
+            <div class="field">
+              <label>Display Name</label>
+              <input id="reg-display" value="Alice" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Algorithm</label>
+              <select id="reg-alg">
+                <option value="-7">-7 · ES256</option>
+                <option value="-8">-8 · EdDSA</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Attestation</label>
+              <select id="reg-att">
+                <option value="none">none</option>
+                <option value="packed">packed</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>User Verification</label>
+              <select id="reg-uv">
+                <option value="required">required</option>
+                <option value="preferred">preferred</option>
+                <option value="discouraged">discouraged</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>UP Callback</label>
+              <select id="reg-up">
+                <option value="true">Allow (→ True)</option>
+                <option value="false">Deny (→ False)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>UV Callback</label>
+              <select id="reg-uvcb">
+                <option value="true">Allow (→ True)</option>
+                <option value="false">Deny (→ False)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <button class="run-btn" id="reg-btn" onclick="runRegister()">Register</button>
+            <button class="run-btn" onclick="runRegisterDuplicate()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)">
+              Test Duplicate →  CredentialExcludedError
+            </button>
+            <div class="spinner" id="reg-spin"></div>
+          </div>
+          <div id="reg-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- AUTHENTICATION                                                     -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-authenticate">
+      <div class="card">
+        <div class="card-header">
+          <h2>PasskeyProvider.get()</h2>
+          <span class="tag tag-auth">authentication</span>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="field">
+              <label>RP ID</label>
+              <input id="auth-rp" value="example.com" />
+            </div>
+            <div class="field">
+              <label>Origin</label>
+              <input id="auth-origin" value="https://example.com" />
+            </div>
+            <div class="field">
+              <label>User Verification</label>
+              <select id="auth-uv">
+                <option value="required">required</option>
+                <option value="preferred">preferred</option>
+                <option value="discouraged">discouraged</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>UP Callback</label>
+              <select id="auth-up">
+                <option value="true">Allow (→ True)</option>
+                <option value="false">Deny (→ False)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>UV Callback</label>
+              <select id="auth-uvcb">
+                <option value="true">Allow (→ True)</option>
+                <option value="false">Deny (→ False)</option>
+              </select>
+            </div>
+          </div>
+          <p style="color:var(--muted);font-size:12px">
+            <code style="color:var(--accent)">allowCredentials</code> is sent empty → resident key discovery.
+            Register at least one credential first.
+          </p>
+          <div class="form-row">
+            <button class="run-btn" id="auth-btn" onclick="runAuthenticate()">Authenticate</button>
+            <div class="spinner" id="auth-spin"></div>
+          </div>
+          <div id="auth-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- ERROR CASES                                                        -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-errors">
+      <div class="card">
+        <div class="card-header">
+          <h2>Error &amp; Exception Cases</h2>
+          <span class="tag tag-error">exceptions</span>
+        </div>
+        <div class="card-body">
+          <p style="color:var(--muted);font-size:12px">
+            Each button triggers a specific exception path and confirms the correct exception type is raised.
+          </p>
+          <div class="error-grid">
+            <button class="error-btn" onclick="runError('origin_mismatch')">
+              <div class="err-name">OriginMismatchError</div>
+              <div class="err-desc">create() with mismatched origin vs rp_id</div>
+            </button>
+            <button class="error-btn" onclick="runError('up_denied')">
+              <div class="err-name">UserVerificationError (UP)</div>
+              <div class="err-desc">up_callback returns False during create()</div>
+            </button>
+            <button class="error-btn" onclick="runError('uv_denied')">
+              <div class="err-name">UserVerificationError (UV)</div>
+              <div class="err-desc">uv_callback returns False, UV=required</div>
+            </button>
+            <button class="error-btn" onclick="runError('unsupported_alg')">
+              <div class="err-name">UnsupportedAlgorithmError (crypto)</div>
+              <div class="err-desc">generate_keypair(-257) — RS256 not supported</div>
+            </button>
+            <button class="error-btn" onclick="runError('unsupported_alg_provider')">
+              <div class="err-name">UnsupportedAlgorithmError (provider)</div>
+              <div class="err-desc">create() with only alg=-257 in pubKeyCredParams</div>
+            </button>
+            <button class="error-btn" onclick="runError('no_credentials')">
+              <div class="err-name">NoCredentialsFoundError</div>
+              <div class="err-desc">get() on empty store for unknown rp_id</div>
+            </button>
+          </div>
+          <div class="spinner" id="err-spin" style="margin-top:8px"></div>
+          <div id="err-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- FULL FLOW                                                          -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-fullflow">
+      <div class="card">
+        <div class="card-header">
+          <h2>End-to-End: Register → Authenticate → Verify</h2>
+          <span class="tag tag-flow">integration</span>
+        </div>
+        <div class="card-body">
+          <p style="color:var(--muted);font-size:12px">
+            Runs a complete WebAuthn ceremony using a fresh isolated in-memory store.
+            Does NOT affect the shared store used by the Registration &amp; Authentication pages.
+          </p>
+          <div class="form-row">
+            <div class="field">
+              <label>RP ID</label>
+              <input id="ff-rp" value="example.com" />
+            </div>
+            <div class="field">
+              <label>Origin</label>
+              <input id="ff-origin" value="https://example.com" />
+            </div>
+            <div class="field">
+              <label>Algorithm</label>
+              <select id="ff-alg">
+                <option value="-7">-7 · ES256</option>
+                <option value="-8">-8 · EdDSA</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>User Verification</label>
+              <select id="ff-uv">
+                <option value="required">required</option>
+                <option value="preferred">preferred</option>
+                <option value="discouraged">discouraged</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>User Name</label>
+              <input id="ff-user" value="demo@example.com" />
+            </div>
+          </div>
+          <div class="form-row">
+            <button class="run-btn" id="ff-btn" onclick="runFullFlow()">Run Full Flow</button>
+            <div class="spinner" id="ff-spin"></div>
+          </div>
+          <div id="ff-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- STORE INSPECTOR                                                    -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-store">
+      <div class="card">
+        <div class="card-header">
+          <h2>InMemoryStore Inspector</h2>
+          <span class="tag tag-store">store</span>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="field">
+              <label>RP ID <span style="color:var(--muted);font-size:11px">(leave blank for all)</span></label>
+              <input id="store-rp" value="" placeholder="e.g. example.com" />
+            </div>
+            <button class="run-btn" id="store-btn" onclick="runStoreInspect()">Inspect</button>
+            <div class="spinner" id="store-spin"></div>
+          </div>
+          <div id="store-result"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// Utilities
+// ═══════════════════════════════════════════════════════════════════════════
+
+const API = '';  // same origin
+
+async function post(path, body = {}) {
+  const r = await fetch(API + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return r.json();
+}
+
+function busy(spinId, btnId, on) {
+  const s = document.getElementById(spinId);
+  const b = document.getElementById(btnId);
+  if (s) s.classList.toggle('visible', on);
+  if (b) b.disabled = on;
+}
+
+function val(id) { return document.getElementById(id).value; }
+function intVal(id) { return parseInt(val(id), 10); }
+function boolVal(id) { return val(id) === 'true'; }
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[char]);
+}
+
+// ─── Page navigation ────────────────────────────────────────────────────────
+function show(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page)?.classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === page);
+  });
+  if (page === 'dashboard') loadDashboard();
+  if (page === 'store') runStoreInspect();
+}
+
+// ─── Result renderer ─────────────────────────────────────────────────────────
+function renderResult(containerId, resp) {
+  const el = document.getElementById(containerId);
+  if (!resp.ok) {
+    el.className = 'result-box visible fail';
+    el.textContent = '✗ Error\n\n' + resp.error;
+    return;
+  }
+  el.className = 'result-box visible ok';
+  el.textContent = JSON.stringify(resp.data, null, 2);
+}
+
+// ─── Rich result renderer (structured) ──────────────────────────────────────
+function renderKV(obj) {
+  const rows = Object.entries(obj).map(([k, v]) => {
+    let valHtml = '';
+    if (v === true)  valHtml = `<span class="kv-pass">✓ true</span>`;
+    else if (v === false) valHtml = `<span class="kv-fail">✗ false</span>`;
+    else if (typeof v === 'object' && v !== null) valHtml = `<span class="kv-val">${JSON.stringify(v)}</span>`;
+    else valHtml = `<span class="kv-val">${v}</span>`;
+    return `<span class="kv-key">${k}</span>${valHtml}`;
+  }).join('');
+  return `<div class="kv-grid">${rows}</div>`;
+}
+
+function renderFlags(f) {
+  return Object.entries(f).map(([k, v]) =>
+    `<span class="flag ${v ? 'flag-on' : 'flag-off'}">${k}</span>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Dashboard
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function loadDashboard() {
+  const rpId = val('dash-rp') || 'example.com';
+  const resp = await post('/api/status', { rpId });
+  document.getElementById('stat-count').textContent = resp.ok ? resp.data.count : '!';
+  document.getElementById('stat-rp').textContent = rpId;
+
+  const container = document.getElementById('dash-creds');
+  if (!resp.ok || resp.data.count === 0) {
+    container.innerHTML = `<p style="color:var(--muted);font-size:12px">No credentials stored for <code>${rpId}</code>.</p>`;
+    return;
+  }
+  container.innerHTML = resp.data.credentials.map(c => `
+    <div class="cred-card">
+      <div class="cred-id">${c.credentialId}</div>
+      <div class="kv-grid">
+        <span class="kv-key">User</span><span class="kv-val">${c.userName} (${c.userDisplayName})</span>
+        <span class="kv-key">Algorithm</span><span class="kv-val">${c.alg === -7 ? '-7 · ES256' : '-8 · EdDSA'}</span>
+        <span class="kv-key">Sign Count</span><span class="kv-val">${c.signCount}</span>
+        <span class="kv-key">Discoverable</span><span class="${c.discoverable ? 'kv-pass' : 'kv-fail'}">${c.discoverable}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Reset
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function resetAll() {
+  if (!confirm('Reset the in-memory store? All credentials will be lost.')) return;
+  await post('/api/reset');
+  loadDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Key Generation
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function runGenerateKeypair() {
+  busy('kp-spin', 'kp-btn', true);
+  const resp = await post('/api/generate-keypair', { alg: intVal('kp-alg') });
+  busy('kp-spin', 'kp-btn', false);
+
+  const el = document.getElementById('kp-result');
+  if (!resp.ok) { el.innerHTML = `<div class="result-box visible fail">${resp.error}</div>`; return; }
+  const d = resp.data;
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="status-bar">
+        <span class="badge badge-pass">✓ Generated</span>
+        <span class="badge badge-info">${d.algName} (${d.alg})</span>
+      </div>
+      <div class="kv-grid">
+        <span class="kv-key">Algorithm</span><span class="kv-val">${d.algName} (COSE ${d.alg})</span>
+        <span class="kv-key">COSE Key Type</span><span class="kv-val">${d.coseKeyType === 2 ? '2 · EC2 (P-256)' : '1 · OKP (Ed25519)'}</span>
+        <span class="kv-key">COSE Alg</span><span class="kv-val">${d.coseAlg}</span>
+        <span class="kv-key">Public Key (COSE hex)</span><span class="kv-val" style="word-break:break-all">${d.publicKeyCoseHex}</span>
+        <span class="kv-key">Private Key PEM (preview)</span><span class="kv-val" style="word-break:break-all">${d.privateKeyPemPreview}</span>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Sign & Verify
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function runSignVerify() {
+  busy('sv-spin', 'sv-btn', true);
+  const resp = await post('/api/sign-and-verify', { alg: intVal('sv-alg'), message: val('sv-msg') });
+  busy('sv-spin', 'sv-btn', false);
+
+  const el = document.getElementById('sv-result');
+  if (!resp.ok) { el.innerHTML = `<div class="result-box visible fail">${resp.error}</div>`; return; }
+  const d = resp.data;
+  const all = d.verifyOriginal && !d.verifyTampered;
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="status-bar">
+        <span class="badge ${all ? 'badge-pass' : 'badge-fail'}">${all ? '✓ All checks pass' : '✗ Unexpected result'}</span>
+        <span class="badge badge-info">${d.algName}</span>
+      </div>
+      <div class="kv-grid">
+        <span class="kv-key">Message</span><span class="kv-val">${d.message}</span>
+        <span class="kv-key">Signature size</span><span class="kv-val">${d.signatureBytes} bytes</span>
+        <span class="kv-key">Signature (hex)</span><span class="kv-val" style="word-break:break-all">${d.signatureHex}</span>
+        <span class="kv-key">verify(original)</span><span class="${d.verifyOriginal ? 'kv-pass' : 'kv-fail'}">${d.verifyOriginal ? '✓ true' : '✗ false'}</span>
+        <span class="kv-key">verify(tampered)</span><span class="${!d.verifyTampered ? 'kv-pass' : 'kv-fail'}">${d.verifyTampered ? '✗ true (BUG!)' : '✓ false (rejected)'}</span>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// clientDataJSON
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function runBuildClientData() {
+  busy('cd-spin', 'cd-btn', true);
+  const resp = await post('/api/build-client-data', { type: val('cd-type'), origin: val('cd-origin') });
+  busy('cd-spin', 'cd-btn', false);
+
+  const el = document.getElementById('cd-result');
+  if (!resp.ok) { el.innerHTML = `<div class="result-box visible fail">${resp.error}</div>`; return; }
+  const d = resp.data;
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="status-bar"><span class="badge badge-pass">✓ Built</span></div>
+      <div class="kv-grid">
+        <span class="kv-key">type</span><span class="kv-val">${d.parsed.type}</span>
+        <span class="kv-key">challenge (b64url)</span><span class="kv-val">${d.parsed.challenge}</span>
+        <span class="kv-key">origin</span><span class="kv-val">${d.parsed.origin}</span>
+        <span class="kv-key">crossOrigin</span><span class="${d.parsed.crossOrigin ? 'kv-fail' : 'kv-pass'}">${d.parsed.crossOrigin}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted)">Raw JSON bytes:</div>
+      <div class="result-box visible ok" style="max-height:80px">${d.raw}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// authData Pack & Parse
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function runPackAuthData() {
+  const aaguid = val('ad-aaguid').replace(/\s/g, '').padEnd(32, '0').slice(0, 32);
+  busy('ad-spin', 'ad-btn', true);
+  const resp = await post('/api/pack-auth-data', {
+    alg: intVal('ad-alg'),
+    rpId: val('ad-rp'),
+    signCount: intVal('ad-sc'),
+    aaguid,
+  });
+  busy('ad-spin', 'ad-btn', false);
+
+  const el = document.getElementById('ad-result');
+  if (!resp.ok) { el.innerHTML = `<div class="result-box visible fail">${resp.error}</div>`; return; }
+  const d = resp.data;
+  const p = d.parsed;
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="status-bar">
+        <span class="badge badge-pass">✓ Packed & Parsed</span>
+        <span class="badge badge-info">${d.authDataBytes} bytes</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted)">Flags:</div>
+      <div class="flags">${renderFlags(p.flagsDecoded)}</div>
+      <div class="kv-grid">
+        <span class="kv-key">rpIdHash matches</span><span class="${p.rpIdHashMatches ? 'kv-pass' : 'kv-fail'}">${p.rpIdHashMatches ? '✓' : '✗'}</span>
+        <span class="kv-key">rpIdHash</span><span class="kv-val">${p.rpIdHashHex}</span>
+        <span class="kv-key">signCount</span><span class="kv-val">${p.signCount}</span>
+        <span class="kv-key">AAGUID</span><span class="kv-val">${p.aaguid}</span>
+        <span class="kv-key">credentialId</span><span class="kv-val">${p.credentialId}</span>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Origin Validation
+// ═══════════════════════════════════════════════════════════════════════════
+
+let _customOriginRows = [];
+
+function addOriginRow() {
+  const id = Date.now();
+  _customOriginRows.push(id);
+  const container = document.getElementById('origin-custom-rows');
+  const row = document.createElement('div');
+  row.id = 'orow-' + id;
+  row.className = 'form-row';
+  row.innerHTML = `
+    <div class="field"><label>Origin</label><input id="o-origin-${id}" value="https://sub.example.com" /></div>
+    <div class="field"><label>RP ID</label><input id="o-rpid-${id}" value="example.com" /></div>
+    <div class="field"><label>Expect</label>
+      <select id="o-expect-${id}">
+        <option value="true">true</option>
+        <option value="false">false</option>
+        <option value="">— (no assertion)</option>
+      </select>
+    </div>
+    <button class="run-btn" onclick="document.getElementById('orow-${id}').remove()"
+      style="background:var(--surface2);color:var(--red);border:1px solid var(--border);align-self:flex-end">✕</button>`;
+  container.appendChild(row);
+}
+
+async function runValidateOrigin() {
+  // Collect custom rows
+  const extra = _customOriginRows
+    .filter(id => document.getElementById('orow-' + id))
+    .map(id => ({
+      origin: document.getElementById('o-origin-' + id)?.value,
+      rpId:   document.getElementById('o-rpid-' + id)?.value,
+      expect: document.getElementById('o-expect-' + id)?.value === '' ? undefined
+              : document.getElementById('o-expect-' + id)?.value === 'true',
+    }));
+
+  busy('origin-spin', 'origin-btn', true);
+  const resp = await post('/api/validate-origin', { cases: extra.length ? undefined : undefined });
+  busy('origin-spin', 'origin-btn', false);
+
+  const el = document.getElementById('origin-result');
+  if (!resp.ok) { el.innerHTML = `<div class="result-box visible fail">${resp.error}</div>`; return; }
+  const d = resp.data;
+
+  const rows = d.results.map(r => {
+    const passCell = r.pass === null ? '<td>—</td>'
+      : r.pass ? `<td><span class="badge badge-pass">✓ PASS</span></td>`
+               : `<td><span class="badge badge-fail">✗ FAIL</span></td>`;
+    const resCell = r.result
+      ? `<td><span class="badge badge-pass">true</span></td>`
+      : `<td><span class="badge badge-fail">false</span></td>`;
+    return `<tr><td style="font-family:var(--mono)">${r.origin}</td><td style="font-family:var(--mono)">${r.rpId}</td>${resCell}<td>${r.expected ?? '—'}</td>${passCell}</tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="status-bar">
+        <span class="badge ${d.allPassed ? 'badge-pass' : 'badge-fail'}">${d.allPassed ? '✓ All cases passed' : '✗ Some cases failed'}</span>
+      </div>
+      <table>
+        <tr><th>Origin</th><th>RP ID</th><th>Result</th><th>Expected</th><th>Pass?</th></tr>
+        ${rows}
+      </table>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Registration
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function runRegister() {
+  busy('reg-spin', 'reg-btn', true);
+  const resp = await post('/api/register', {
+    rpId:            val('reg-rp'),
+    origin:          val('reg-origin'),
+    userName:        val('reg-user'),
+    userDisplayName: val('reg-display'),
+    alg:             intVal('reg-alg'),
+    attestation:     val('reg-att'),
+    userVerification: val('reg-uv'),
+    upAllow:         boolVal('reg-up'),
+    uvAllow:         boolVal('reg-uvcb'),
+  });
+  busy('reg-spin', 'reg-btn', false);
+
+  const el = document.getElementById('reg-result');
+  if (!resp.ok) {
+    el.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px">
+      <div class="status-bar"><span class="badge badge-fail">✗ ${resp.error}</span></div>
+    </div>`;
+    return;
+  }
+  const d = resp.data;
+  loadDashboard();
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="status-bar">
+        <span class="badge badge-pass">✓ Registered</span>
+        <span class="badge badge-info">fmt: ${d.attestationFmt}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted)">authData Flags:</div>
+      <div class="flags">${renderFlags(d.authData.flagsDecoded)}</div>
+      <div class="kv-grid">
+        <span class="kv-key">Credential ID</span><span class="kv-val">${d.id}</span>
+        <span class="kv-key">Raw ID (hex)</span><span class="kv-val">${d.rawIdHex}</span>
+        <span class="kv-key">Transports</span><span class="kv-val">${d.transports.join(', ')}</span>
+        <span class="kv-key">rpIdHash matches</span><span class="${d.authData.rpIdHashMatches ? 'kv-pass' : 'kv-fail'}">${d.authData.rpIdHashMatches ? '✓' : '✗'}</span>
+        <span class="kv-key">AT flag (attested cred data)</span><span class="${d.authData.flagsDecoded.AT ? 'kv-pass' : 'kv-fail'}">${d.authData.flagsDecoded.AT ? '✓ set' : '✗ missing'}</span>
+        <span class="kv-key">UP flag</span><span class="${d.authData.flagsDecoded.UP ? 'kv-pass' : 'kv-fail'}">${d.authData.flagsDecoded.UP ? '✓ set' : '✗ missing'}</span>
+        <span class="kv-key">AAGUID</span><span class="kv-val">${d.authData.aaguid ?? '—'}</span>
+        <span class="kv-key">attStmt keys</span><span class="kv-val">${d.attestationObject.attStmtKeys.join(', ') || '(empty — none attestation)'}</span>
+      </div>
+    </div>`;
+}
+
+async function runRegisterDuplicate() {
+  busy('reg-spin', 'reg-btn', true);
+  const resp = await post('/api/register-duplicate', { rpId: val('reg-rp'), origin: val('reg-origin') });
+  busy('reg-spin', 'reg-btn', false);
+
+  const el = document.getElementById('reg-result');
+  if (!resp.ok) {
+    el.innerHTML = `<div class="result-box visible fail">${resp.error}</div>`;
+    return;
+  }
+  const d = resp.data;
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="status-bar"><span class="badge badge-pass">✓ Exception caught correctly</span></div>
+      <div class="kv-grid">
+        <span class="kv-key">Exception type</span><span class="kv-pass">${d.caught}</span>
+        <span class="kv-key">Message</span><span class="kv-val">${d.message}</span>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Authentication
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function runAuthenticate() {
+  busy('auth-spin', 'auth-btn', true);
+  const resp = await post('/api/authenticate', {
+    rpId:             val('auth-rp'),
+    origin:           val('auth-origin'),
+    userVerification: val('auth-uv'),
+    allowCredentials: [],
+    upAllow:          boolVal('auth-up'),
+    uvAllow:          boolVal('auth-uvcb'),
+  });
+  busy('auth-spin', 'auth-btn', false);
+
+  const el = document.getElementById('auth-result');
+  if (!resp.ok) {
+    el.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px">
+      <div class="status-bar"><span class="badge badge-fail">✗ ${resp.error}</span></div>
+    </div>`;
+    return;
+  }
+  const d = resp.data;
+  loadDashboard();
+  const sigOk = d.serverSideVerification.signatureValid;
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="status-bar">
+        <span class="badge ${sigOk ? 'badge-pass' : 'badge-fail'}">${sigOk ? '✓ Signature valid' : '✗ Signature INVALID'}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted)">authData Flags:</div>
+      <div class="flags">${renderFlags(d.authData.flagsDecoded)}</div>
+      <div class="kv-grid">
+        <span class="kv-key">Credential ID</span><span class="kv-val">${d.id}</span>
+        <span class="kv-key">User Handle</span><span class="kv-val">${d.userHandle ?? '—'}</span>
+        <span class="kv-key">Sign Count (stored)</span><span class="kv-val">${d.serverSideVerification.signCount}</span>
+        <span class="kv-key">Signature (hex, truncated)</span><span class="kv-val">${d.signatureHex.slice(0, 48)}…</span>
+        <span class="kv-key">Signature bytes</span><span class="kv-val">${d.signatureBytes}</span>
+        <span class="kv-key">Server-side verify</span><span class="${sigOk ? 'kv-pass' : 'kv-fail'}">${sigOk ? '✓ VALID' : '✗ INVALID'}</span>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Error Cases
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function runError(caseKey) {
+  const spin = document.getElementById('err-spin');
+  spin.classList.add('visible');
+  const resp = await post('/api/error-case', { case: caseKey });
+  spin.classList.remove('visible');
+
+  const el = document.getElementById('err-result');
+  if (!resp.ok) {
+    el.innerHTML = `<div class="result-box visible fail">${resp.error}</div>`;
+    return;
+  }
+  const d = resp.data;
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="status-bar"><span class="badge badge-pass">✓ Exception caught correctly</span></div>
+      <div class="kv-grid">
+        <span class="kv-key">Exception type</span><span class="kv-pass">${d.caught}</span>
+        <span class="kv-key">Message</span><span class="kv-val">${d.message}</span>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Full Flow
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function runFullFlow() {
+  busy('ff-spin', 'ff-btn', true);
+  const resp = await post('/api/full-flow', {
+    rpId:             val('ff-rp'),
+    origin:           val('ff-origin'),
+    alg:              intVal('ff-alg'),
+    userVerification: val('ff-uv'),
+    userName:         val('ff-user'),
+  });
+  busy('ff-spin', 'ff-btn', false);
+
+  const el = document.getElementById('ff-result');
+  if (!resp.ok) { el.innerHTML = `<div class="result-box visible fail">${resp.error}</div>`; return; }
+  const d = resp.data;
+  const all = d.allChecksPass;
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="status-bar">
+        <span class="badge ${all ? 'badge-pass' : 'badge-fail'} " style="font-size:13px;padding:4px 14px">
+          ${all ? '✓ Full flow passed' : '✗ Some checks failed'}
+        </span>
+        <span class="badge badge-info">${d.algName} (${d.alg})</span>
+      </div>
+
+      <div style="font-size:12px;font-weight:600;color:var(--muted)">Registration</div>
+      <div style="font-size:11px;color:var(--muted)">authData Flags:</div>
+      <div class="flags">${renderFlags(d.registration.flagsDecoded)}</div>
+      <div class="kv-grid">
+        <span class="kv-key">Credential ID</span><span class="kv-val">${d.registration.credentialId}</span>
+        <span class="kv-key">Attestation fmt</span><span class="kv-val">${d.registration.attestationFmt}</span>
+        <span class="kv-key">Sign Count</span><span class="kv-val">${d.registration.signCount}</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="font-size:12px;font-weight:600;color:var(--muted)">Authentication</div>
+      <div style="font-size:11px;color:var(--muted)">authData Flags:</div>
+      <div class="flags">${renderFlags(d.authentication.flagsDecoded)}</div>
+      <div class="kv-grid">
+        <span class="kv-key">Credential ID</span><span class="kv-val">${d.authentication.credentialId}</span>
+        <span class="kv-key">User Handle</span><span class="kv-val">${d.authentication.userHandle ?? '—'}</span>
+        <span class="kv-key">Sign Count (after auth)</span><span class="kv-val">${d.authentication.signCount}</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="font-size:12px;font-weight:600;color:var(--muted)">RP Server Verification</div>
+      <div class="kv-grid">
+        <span class="kv-key">Signature valid</span>
+        <span class="${d.verification.signatureValid ? 'kv-pass' : 'kv-fail'}">${d.verification.signatureValid ? '✓ VALID' : '✗ INVALID'}</span>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Store Inspector
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function runStoreInspect() {
+  const rpId = val('store-rp').trim();
+  busy('store-spin', 'store-btn', true);
+  const resp = await post('/api/status', rpId ? { rpId } : {});
+  busy('store-spin', 'store-btn', false);
+
+  const el = document.getElementById('store-result');
+  if (!resp.ok) { el.innerHTML = `<div class="result-box visible fail">${resp.error}</div>`; return; }
+  const d = resp.data;
+
+  if (d.count === 0) {
+    const scope = rpId ? `<code>${rpId}</code>` : 'any RP';
+    el.innerHTML = `<p style="color:var(--muted);font-size:12px">No credentials found for ${scope}.</p>`;
+    return;
+  }
+
+  const scopeLabel = rpId ? `for <code>${rpId}</code>` : 'across all RPs';
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="status-bar"><span class="badge badge-info">${d.count} credential${d.count > 1 ? 's' : ''} ${scopeLabel}</span></div>
+      ${d.credentials.map(c => `
+        <div class="cred-card">
+          <div class="cred-id">${escapeHtml(c.credentialId)}</div>
+          <div class="kv-grid">
+            <span class="kv-key">User</span><span class="kv-val">${escapeHtml(c.userName)} · ${escapeHtml(c.userDisplayName)}</span>
+            <span class="kv-key">RP ID</span><span class="kv-val">${escapeHtml(c.rpId)}</span>
+            <span class="kv-key">Algorithm</span><span class="kv-val">${c.alg === -7 ? '-7 · ES256' : '-8 · EdDSA'}</span>
+            <span class="kv-key">Sign Count</span><span class="kv-val">${c.signCount}</span>
+            <span class="kv-key">Discoverable</span><span class="${c.discoverable ? 'kv-pass' : 'kv-fail'}">${c.discoverable}</span>
+          </div>
+          <div style="margin-top:10px">
+            <button class="run-btn" type="button"
+              data-rp-id="${escapeHtml(c.rpId)}"
+              data-credential-id="${escapeHtml(c.credentialId)}"
+              onclick="revealCredentialKey(this)">Reveal secret key</button>
+            <pre style="display:none;white-space:pre-wrap;overflow-wrap:anywhere;margin:10px 0 0;padding:10px;background:var(--surface2);border-radius:6px"></pre>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+async function revealCredentialKey(button) {
+  const output = button.nextElementSibling;
+  if (button.dataset.revealed === 'true') {
+    output.style.display = 'none';
+    output.textContent = '';
+    button.dataset.revealed = 'false';
+    button.textContent = 'Reveal secret key';
+    return;
+  }
+
+  button.disabled = true;
+  output.style.display = 'block';
+  output.textContent = 'Loading secret key…';
+  try {
+    const resp = await post('/api/credential-secret', {
+      rpId: button.dataset.rpId,
+      credentialId: button.dataset.credentialId,
+    });
+    if (!resp.ok) {
+      output.textContent = resp.error;
+      return;
+    }
+    output.textContent = resp.data.privateKeyPem;
+    button.dataset.revealed = 'true';
+    button.textContent = 'Hide secret key';
+  } catch (error) {
+    output.textContent = `Unable to retrieve secret key: ${error.message}`;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Boot
+// ═══════════════════════════════════════════════════════════════════════════
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadDashboard();
+  // Fix AAGUID input default length
+  document.getElementById('ad-aaguid').value = 'aa'.repeat(16);
+});
+</script>
+</body>
+</html>
