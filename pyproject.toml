@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pysskey"
+version = "0.1.0"
+description = "A pure-Python client-side Passkey (WebAuthn Level 2/3) authenticator library"
+requires-python = ">=3.10"
+dependencies = [
+    "cryptography>=42.0.0",
+    "cbor2>=5.6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=pysskey --cov-report=term-missing"
