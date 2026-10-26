@@ -1,0 +1,45 @@
+{
+  "manifest_version": 2,
+  "name": "pysskey WebAuthn Provider",
+  "version": "1.0.0",
+  "description": "Intercepts WebAuthn navigator.credentials.create/get and routes them through pysskey running on localhost.",
+  "homepage_url": "https://github.com/pysskey",
+
+  "icons": {
+    "48": "icons/icon48.png",
+    "96": "icons/icon96.png"
+  },
+
+  "browser_action": {
+    "default_icon": {
+      "48": "icons/icon48.png"
+    },
+    "default_popup": "popup/popup.html",
+    "default_title": "pysskey WebAuthn Provider"
+  },
+
+  "permissions": [
+    "storage",
+    "activeTab",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/inject.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+
+  "background": {
+    "scripts": ["background/background.js"],
+    "persistent": false
+  },
+
+  "web_accessible_resources": [
+    "content/webauthn_override.js"
+  ]
+}

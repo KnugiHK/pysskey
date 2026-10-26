@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pysskey WebAuthn Provider</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">🔑</div>
+    <h1>pysskey</h1>
+    <p class="subtitle">WebAuthn Provider</p>
+  </header>
+
+  <section class="card">
+    <div class="toggle-row">
+      <span class="label">Enable interception</span>
+      <label class="switch" aria-label="Enable pysskey WebAuthn interception">
+        <input type="checkbox" id="enabledToggle" />
+        <span class="slider"></span>
+      </label>
+    </div>
+  </section>
+
+  <section class="card">
+    <label class="field-label" for="serverUrl">pysskey server URL</label>
+    <div class="input-row">
+      <input
+        type="text"
+        id="serverUrl"
+        placeholder="http://127.0.0.1:8742"
+        spellcheck="false"
+        autocomplete="off"
+      />
+      <button id="saveUrl" title="Save URL">Save</button>
+    </div>
+    <p id="saveStatus" class="save-status" aria-live="polite"></p>
+  </section>
+
+  <section class="card">
+    <div class="status-row">
+      <span class="label">Server status</span>
+      <span id="serverStatus" class="badge badge-unknown">checking…</span>
+    </div>
+    <button id="refreshStatus" class="btn-small">Refresh</button>
+
+    <div id="credentialList" class="cred-list hidden">
+      <p class="cred-list-title">Stored credentials</p>
+      <ul id="credItems"></ul>
+    </div>
+  </section>
+
+  <script src="popup.js"></script>
+</body>
+</html>

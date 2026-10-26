@@ -1,0 +1,211 @@
+/* popup.css — pysskey WebAuthn Provider popup styles */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 300px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  color: #1a1a2e;
+  background: #f5f7ff;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+header {
+  background: linear-gradient(135deg, #4361ee, #7209b7);
+  color: white;
+  padding: 16px;
+  text-align: center;
+}
+
+.logo {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+header h1 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.subtitle {
+  font-size: 11px;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+
+.card {
+  background: white;
+  margin: 8px;
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* ── Toggle row ─────────────────────────────────────────────────────────── */
+
+.toggle-row, .status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.label {
+  font-weight: 500;
+  color: #333;
+}
+
+/* ── Toggle switch ───────────────────────────────────────────────────────── */
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+  position: absolute;
+  inset: 0;
+  background: #ccc;
+  border-radius: 22px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.switch input:checked + .slider { background: #4361ee; }
+.switch input:checked + .slider::before { transform: translateX(18px); }
+
+/* ── Server URL input ────────────────────────────────────────────────────── */
+
+.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.input-row {
+  display: flex;
+  gap: 6px;
+}
+
+.input-row input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: monospace;
+  color: #333;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input-row input:focus { border-color: #4361ee; }
+
+.input-row button {
+  padding: 6px 10px;
+  background: #4361ee;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.input-row button:hover { background: #3451d1; }
+
+.save-status {
+  font-size: 11px;
+  color: #4caf50;
+  margin-top: 5px;
+  min-height: 14px;
+}
+
+.save-status.error { color: #f44336; }
+
+/* ── Status badge ────────────────────────────────────────────────────────── */
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.badge-unknown  { background: #eee;    color: #666; }
+.badge-online   { background: #e8f5e9; color: #2e7d32; }
+.badge-offline  { background: #ffebee; color: #c62828; }
+
+.btn-small {
+  margin-top: 8px;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #555;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btn-small:hover { border-color: #4361ee; color: #4361ee; }
+
+/* ── Credential list ─────────────────────────────────────────────────────── */
+
+.cred-list { margin-top: 10px; }
+
+.cred-list-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.cred-list ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cred-list li {
+  background: #f5f7ff;
+  border-radius: 5px;
+  padding: 6px 8px;
+  font-size: 11px;
+  color: #333;
+}
+
+.cred-list li strong { color: #4361ee; }
+
+.hidden { display: none !important; }
